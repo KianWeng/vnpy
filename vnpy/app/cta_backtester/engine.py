@@ -12,6 +12,7 @@ from vnpy.trader.constant import Interval
 from vnpy.trader.utility import extract_vt_symbol
 from vnpy.trader.object import HistoryRequest
 from vnpy.trader.rqdata import rqdata_client
+from vnpy.trader.tushare import tusharedata
 from vnpy.trader.database import database_manager
 from vnpy.app.cta_strategy import CtaTemplate
 from vnpy.app.cta_strategy.backtesting import BacktestingEngine, OptimizationSetting
@@ -66,9 +67,10 @@ class BacktesterEngine(BaseEngine):
 
     def write_log(self, msg: str):
         """"""
-        event = Event(EVENT_BACKTESTER_LOG)
-        event.data = msg
-        self.event_engine.put(event)
+        # event = Event(EVENT_BACKTESTER_LOG)
+        # event.data = msg
+        # self.event_engine.put(event)
+        print(f"{datetime.now()}\t{msg}")
 
     def load_strategy_class(self):
         """
@@ -381,7 +383,9 @@ class BacktesterEngine(BaseEngine):
                 )
             # Otherwise use RQData to query data
             else:
-                data = rqdata_client.query_history(req)
+                # data = rqdata_client.query_history(req)
+                tq = tusharedata
+                data = tq.tuquery(req)
 
             if data:
                 database_manager.save_bar_data(data)
