@@ -6,8 +6,9 @@ from vnpy.trader.engine import BaseEngine, MainEngine, EventEngine
 from vnpy.trader.constant import Interval, Exchange
 from vnpy.trader.object import BarData, HistoryRequest
 from vnpy.trader.database import database_manager
+from vnpy.trader.setting import SETTINGS
 from vnpy.trader.rqdata import rqdata_client
-from vnpy.trader.tushare import tusharedata
+from vnpy.trader.jqdata import jqdata_client
 
 
 APP_NAME = "DataManager"
@@ -210,12 +211,16 @@ class ManagerEngine(BaseEngine):
             )
         # Otherwise use RQData to query data
         else:
-            if not rqdata_client.inited:
-                rqdata_client.init()
+            data_engine = SETTINGS["data_engine"]
 
-            # data = rqdata_client.query_history(req)
-            tq = tusharedata
-            data = tq.tuquery(req)
+            if data_engine == "rq":
+                if not rqdata_client.inited:
+                    rqdata_client.init()
+                data = rqdata_client.query_history(req)
+            else:
+                if not jqdata_client.inited:
+                    jqdata_client.init()
+                data = jqdata_client.query_history(req)
 
         if data:
             database_manager.save_bar_data(data)

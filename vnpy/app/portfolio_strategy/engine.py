@@ -39,8 +39,9 @@ from vnpy.trader.constant import (
 )
 from vnpy.trader.utility import load_json, save_json, extract_vt_symbol, round_to
 from vnpy.trader.database import database_manager
+from vnpy.trader.setting import SETTINGS
 from vnpy.trader.rqdata import rqdata_client
-from vnpy.trader.tushare import tusharedata
+from vnpy.trader.jqdata import jqdata_client
 from vnpy.trader.converter import OffsetConverter
 
 from .base import (
@@ -100,9 +101,15 @@ class StrategyEngine(BaseEngine):
         """
         Init RQData client.
         """
-        result = rqdata_client.init()
+        data_engine = SETTINGS["data_engine"]
+        if data_engine == "rq":
+            result = rqdata_client.init()
+        else:
+            result = jqdata_client.init()
         if result:
             self.write_log("RQData数据接口初始化成功")
+        else:
+            self.write_log("RQData数据接口初始化失败")
 
     def query_bar_from_rq(
         self, symbol: str, exchange: Exchange, interval: Interval, start: datetime, end: datetime
@@ -117,9 +124,16 @@ class StrategyEngine(BaseEngine):
             start=start,
             end=end
         )
-        # data = rqdata_client.query_history(req)
-        tq = tusharedata
-        data = tq.tuquery(req)
+        data_engine = SETTINGS["data_engine"]
+        if data_engine == "rq":
+            if not rqdata_client.inited:
+                rqdata_client.init()
+            data = rqdata_client.query_history(req)
+        else:
+            if not jqdata_client.inited:
+                jqdata_client.init()
+            data = jqdata_client.query_history(req)
+
         return data
 
     def process_tick_event(self, event: Event):

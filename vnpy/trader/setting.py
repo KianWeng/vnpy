@@ -24,8 +24,11 @@ SETTINGS: Dict[str, Any] = {
     "email.sender": "",
     "email.receiver": "",
 
+    "data_engine": "jq",
     "rqdata.username": "",
     "rqdata.password": "",
+    "jqdata.username": "",
+    "jqdata.password": "",
 
     "database.timezone": get_localzone().zone,
     "database.driver": "sqlite",                # see database.Driver

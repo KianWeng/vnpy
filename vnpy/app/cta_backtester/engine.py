@@ -9,10 +9,11 @@ from inspect import getfile
 from vnpy.event import Event, EventEngine
 from vnpy.trader.engine import BaseEngine, MainEngine
 from vnpy.trader.constant import Interval
+from vnpy.trader.setting import SETTINGS
 from vnpy.trader.utility import extract_vt_symbol
 from vnpy.trader.object import HistoryRequest
 from vnpy.trader.rqdata import rqdata_client
-from vnpy.trader.tushare import tusharedata
+from vnpy.trader.jqdata import jqdata_client
 from vnpy.trader.database import database_manager
 from vnpy.app.cta_strategy import CtaTemplate
 from vnpy.app.cta_strategy.backtesting import BacktestingEngine, OptimizationSetting
@@ -61,9 +62,15 @@ class BacktesterEngine(BaseEngine):
         """
         Init RQData client.
         """
-        result = rqdata_client.init()
+        data_engine = SETTINGS["data_engine"]
+        if data_engine == "rq":
+            result = rqdata_client.init()
+        else:
+            result = jqdata_client.init()
         if result:
             self.write_log("RQData数据接口初始化成功")
+        else:
+            self.write_log("RQData数据接口初始化失败")
 
     def write_log(self, msg: str):
         """"""
@@ -383,10 +390,16 @@ class BacktesterEngine(BaseEngine):
                 )
             # Otherwise use RQData to query data
             else:
-                # data = rqdata_client.query_history(req)
-                tq = tusharedata
-                data = tq.tuquery(req)
-
+                data_engine = SETTINGS["data_engine"]
+                if data_engine == "rq":
+                    if not rqdata_client.inited:
+                        rqdata_client.init()
+                    data = rqdata_client.query_history(req)
+                else:
+                    if not jqdata_client.inited:
+                        jqdata_client.init()
+                    data = jqdata_client.query_history(req)
+                    
             if data:
                 database_manager.save_bar_data(data)
                 self.write_log(f"{vt_symbol}-{interval}历史数据下载完成")

@@ -26,8 +26,9 @@ from vnpy.trader.object import (
     LogData,
     BarData
 )
+from vnpy.trader.setting import SETTINGS
 from vnpy.trader.rqdata import rqdata_client
-from vnpy.trader.tushare import tusharedata
+from vnpy.trader.jqdata import jqdata_client
 
 
 APP_NAME = "ScriptTrader"
@@ -258,8 +259,11 @@ class ScriptEngine(BaseEngine):
             interval=interval
         )
 
-        # return get_data(rqdata_client.query_history, arg=req, use_df=use_df)
-        return get_data(tusharedata.tuquery, arg=req, use_df=use_df)
+        data_engine = SETTINGS["data_engine"]
+        if data_engine == "rq":
+            return get_data(rqdata_client.query_history, arg=req, use_df=use_df)
+        else:
+            return get_data(jqdata_client.query_history, arg=req, use_df=use_df)
 
     def write_log(self, msg: str) -> None:
         """"""
