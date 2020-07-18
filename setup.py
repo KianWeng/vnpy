@@ -72,6 +72,7 @@ def get_install_requires():
         "futu-api",
         "tigeropen",
         "rqdatac",
+        "jqdatasdk",
         "ta-lib",
         "ibapi",
         "deap",

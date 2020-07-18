@@ -18,7 +18,7 @@ function install-ta-lib()
     cd ta-lib
     ./configure --prefix=$prefix
     make -j
-    make install
+    sudo make install
     popd
 }
 function ta-lib-exists()
@@ -26,6 +26,7 @@ function ta-lib-exists()
     ta-lib-config --libs > /dev/null
 }
 ta-lib-exists || install-ta-lib
+sudo apt install libpq-dev
 
 # old versions of ta-lib imports numpy in setup.py
 $python -m pip install numpy
